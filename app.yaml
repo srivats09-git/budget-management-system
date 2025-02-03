@@ -1,0 +1,33 @@
+# app.yaml
+runtime: python39
+instance_class: F1  # Smallest instance class to minimize costs
+
+env_variables:
+  CLOUD_SQL_CONNECTION_NAME: "project-id:region:instance-name"
+  DB_USER: "budget_app"
+  DB_PASS: "${DB_PASSWORD}"  # Set in Cloud Console
+  DB_NAME: "budget_db"
+
+handlers:
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: auto
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 2  # Limit instances to control costs
+
+# cloudbuild.yaml
+steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['app', 'deploy']
+
+# .env.yaml (for local development)
+env_variables:
+  DB_HOST: "localhost"
+  DB_USER: "budget_app"
+  DB_PASS: "local_dev_password"
+  DB_NAME: "budget_db"
